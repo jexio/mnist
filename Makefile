@@ -1,4 +1,4 @@
-NAME?=petfinder
+NAME?=mnist
 COMMAND?=bash
 OPTIONS?=
 
