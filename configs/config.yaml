@@ -1,0 +1,23 @@
+defaults:
+  - _self_
+  - callbacks: default.yaml
+  - datamodule: default.yaml
+  - mode: default.yaml
+  - logger: null
+  - losses: ce.yaml
+  - metrics: default.yaml
+  - model: default.yaml
+  - optimizer: adamw.yaml
+  - scheduler: cosine.yaml
+  - trainer: default.yaml
+
+
+work_dir: ${hydra:runtime.cwd}
+data_dir: ${work_dir}/data
+
+# disable python warnings if they annoy you
+ignore_warnings: True
+
+# name of the run, accessed by loggers
+project_name: mnist
+name: null

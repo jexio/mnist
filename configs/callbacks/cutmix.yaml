@@ -1,0 +1,6 @@
+mix:
+    _target_: fulmo.callbacks.CutMixCallback
+    apply_on_epoch: 0
+    stop_after_epoch: -1
+    alpha: 0.5
+    probability: 1.0

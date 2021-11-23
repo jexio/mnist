@@ -1,0 +1,4 @@
+name: cosine_annealing_warm_restarts
+frequency: 2
+T_0: 4
+eta_min: 0.00000001

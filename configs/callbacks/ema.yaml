@@ -1,0 +1,6 @@
+ema:
+    _target_: fulmo.callbacks.EmaCallback
+    ema_decay_per_epoch: 0.3
+    every_n_step: 10
+    apply_on_epoch: 1
+    device: cpu

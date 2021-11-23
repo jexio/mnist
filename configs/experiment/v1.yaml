@@ -1,0 +1,139 @@
+# @package _global_
+
+defaults:
+  - override /losses: ce.yaml                # choose losses set from 'configs/losses/' folder
+  - override /trainer: default.yaml                     # choose trainer from 'configs/trainer/' folder
+  - override /datamodule: default.yaml                  # choose datamodule from 'configs/datamodule/' folder
+  - override /metrics: v1.yaml                     # choose metric set from 'configs/metrics/' folder
+  - override /callbacks: v1.yaml                        # choose callback set from 'configs/callbacks/' folder
+  - override /model: effnet_b0.yaml                        # choose model from 'configs/model/' folder
+  - override /mode: default.yaml
+  - override /optimizer: adamw.yaml                     # choose optimizer set from 'configs/optimizer/' folder
+  - override /scheduler: cosine_restart.yaml            # choose scheduler set from 'configs/scheduler/' folder
+  - override /logger: null                              # choose logger from 'configs/logger/'
+
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+seed: 2021
+use_scheduler: True
+sync_dist: True
+num_classes: 10
+in_channels: 1
+reduction_func: ${eval:torch.mean}
+
+datamodule:                                        # you can add here any params you want and then access them in lightning datamodule
+  parameters:
+    train:
+      batch_size: 256 #64
+      num_workers: 0                                # num of processes used for loading data in parallel
+      pin_memory: False                             # dataloaders will copy tensors into CUDA pinned memory before returning them
+      drop_last: True
+    val:
+      batch_size: 256 #64
+      num_workers: 0
+      pin_memory: False
+      drop_last: False
+    test:
+      batch_size: 256 #64
+      num_workers: 0
+      pin_memory: False
+      drop_last: False
+
+trainer:
+  gpus: 1
+  auto_scale_batch_size: False                   # https://pytorch-lightning.readthedocs.io/en/latest/advanced/training_tricks.html#auto-scaling-of-batch-size
+  accelerator: ddp
+  num_nodes: 1
+  gradient_clip_val: 0.0
+  gradient_clip_algorithm: norm
+  accumulate_grad_batches: 1                     # perform optimization step after accumulating gradient from 1 batches
+  num_sanity_val_steps: 0
+  max_epochs: 5
+  progress_bar_refresh_rate: 10
+  profiler: simple
+  precision: 32
+  sync_batchnorm: True
+  limit_train_batches: 1.0
+  limit_val_batches: 1.0
+  plugins:
+    - _target_: pytorch_lightning.plugins.DDPPlugin
+      find_unused_parameters: False
+
+logger:                                            # you can add here additional logger arguments specific for this experiment
+  tensorboard:
+    save_dir: ${work_dir}/tensorboard_logs/v1
+
+optimizer:
+    lr: 0.003 #${scale_lr:[0.001, 512, ${datamodule.parameters.train.batch_size}, ${trainer.accumulate_grad_batches}, ${trainer.gpus}, ${trainer.num_nodes}]}
+    weight_decay: 0.0000001
+
+
+scheduler:
+    T_0: ${eval:${trainer.max_epochs} // 2}
+    T_mult: 10
+    eta_min: 0.000001
+
+callbacks:
+    model_checkpoint:
+        save_last: False
+        save_weights_only: True
+        verbose: True
+        mode: min
+        save_top_k: 1
+        monitor: "val/loss"
+        dirpath: "checkpoints/"
+        filename: "{epoch:02d}"
+    early_stopping:
+        monitor: "val/loss"
+        patience: 3
+        mode: min
+        min_delta: 0.000001
+    learning_rate_monitor:
+      logging_interval: epoch
+    mix:
+      alpha: 0.5
+      probability: 0.5
+
+metrics:
+    recall:
+      wrapper_params:
+        output_key: logits
+        target_key: target
+    precision:
+      wrapper_params:
+        output_key: logits
+        target_key: target
+    accuracy:
+      wrapper_params:
+        output_key: logits
+        target_key: target
+
+input_keys_to_callback:
+  - target
+  - logits
+input_keys:
+  - features
+output_keys:
+  - logits
+
+
+optimizer_extension:
+  lookahead:
+    params:
+      k: 5
+      alpha: 0.5
+
+  lrs_per_module:
+    backbone:
+      params:
+        lr: ${optimizer.lr}
+        weight_decay: 0.0
+    pool:
+      params:
+        lr: ${eval:${optimizer.lr} * 1}
+    head:
+      params:
+        lr: ${eval:${optimizer.lr} * 1}
+        weight_decay: 0.0

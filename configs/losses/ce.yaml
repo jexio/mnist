@@ -1,0 +1,9 @@
+bce:
+  _target_: torch.nn.CrossEntropyLoss
+  reduction: mean
+  wrapper_params:
+    weight: 1.0
+  matcher_params:
+    target_key: target
+    output_key: logits
+    mix_strategy: mix

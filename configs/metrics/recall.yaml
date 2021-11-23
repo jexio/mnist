@@ -1,0 +1,7 @@
+recall:
+  _target_: torchmetrics.Recall
+  average: macro
+  num_classes: ${num_classes}
+  wrapper_params:
+    activation: argmax
+    dim: -1

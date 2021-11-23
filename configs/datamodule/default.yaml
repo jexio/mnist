@@ -1,0 +1,25 @@
+_target_: datamodules.MnistDataModule
+data_dir: ${data_dir}
+parameters:
+  train:
+    _target_: fulmo.core.BaseDataModuleParameters
+    batch_size: ???
+    shuffle: True
+    num_workers: 0
+    pin_memory: False
+    drop_last: True
+  val:
+    _target_: fulmo.core.BaseDataModuleParameters
+    batch_size: ???
+    num_workers: 0
+    pin_memory: False
+    drop_last: False
+  test:
+    _target_: fulmo.core.BaseDataModuleParameters
+    batch_size: ???
+    num_workers: 0
+    pin_memory: False
+    drop_last: False
+
+seed: ${seed}
+val_split: 5000

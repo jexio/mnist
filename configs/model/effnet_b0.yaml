@@ -1,0 +1,17 @@
+name: image_classification
+backbone: tf_efficientnet_b0_ns
+model_parameters:
+  pretrained: True
+  in_chans: ${in_channels}
+  num_classes: 0
+  global_pool: ""
+pool_name: catavgmax
+pool_parameters:
+  output_size: 1
+num_layers: 1
+activation_head_name: lrelu
+activation_head_parameters:
+  negative_slope: 0.3
+dropout_head: 0.5
+layers_head_order: ${to_tuple:["dropout", "linear", "bn", "activation"]}
+num_classes: ${num_classes}

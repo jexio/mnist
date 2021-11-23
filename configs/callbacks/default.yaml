@@ -1,0 +1,18 @@
+model_checkpoint:
+  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  monitor: "acc"
+  mode: "max"
+  dirpath: "checkpoints/"
+  save_top_k: 1
+  filename: "{epoch:02d}"
+
+early_stopping:
+  _target_: pytorch_lightning.callbacks.EarlyStopping
+  monitor: "acc"
+  mode: "max"
+  patience: 30
+  min_delta: 0.0001
+
+learning_rate_monitor:
+  _target_:  pytorch_lightning.callbacks.LearningRateMonitor
+  logging_interval:

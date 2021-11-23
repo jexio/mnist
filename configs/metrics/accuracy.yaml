@@ -1,0 +1,5 @@
+accuracy:
+  _target_: torchmetrics.Accuracy
+  wrapper_params:
+    activation: argmax
+    dim: -1

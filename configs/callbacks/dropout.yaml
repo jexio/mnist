@@ -1,0 +1,4 @@
+dropout:
+    _target_: fulmo.callbacks.ScheduledDropoutCallback
+    attr_name: head
+    epochs: ${trainer.max_epochs}

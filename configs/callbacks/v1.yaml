@@ -1,0 +1,5 @@
+defaults:
+    - default.yaml
+    - dropout.yaml
+    - cutmix.yaml
+    - ema.yaml
